@@ -1,6 +1,5 @@
 # Dissertation
-Certainly! Here is a complete README file based on the provided information:
-Artificial Intelligence-Driven Honeypot-Enabled Active Defense Mechanisms for Healthcare Internet of Things Devices against Ransomware from Advanced Persistent Threats
+Title: Artificial Intelligence-Driven Honeypot-Enabled Active Defense Mechanisms for Healthcare Internet of Things Devices against Ransomware from Advanced Persistent Threats
 Introduction & Background
 
 This research investigates the development of AI-driven honeypot-enabled active defense mechanisms for healthcare IoT devices against ransomware from advanced persistent threats. The main objective is to develop an AI-driven honeypot-enabled active defense mechanism for healthcare IoT devices to detect, prevent, and respond to ransomware attacks from advanced persistent threats. By addressing the security vulnerabilities of healthcare IoT devices, this project aims to protect patient data, ensure uninterrupted healthcare services, and mitigate the financial and reputational risks faced by healthcare organizations.
