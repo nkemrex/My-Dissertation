@@ -1,0 +1,107 @@
+import os
+import hashlib
+import pyinotify
+import numpy as np
+from sklearn.ensemble import IsolationForest
+
+# Define the path to monitor
+path_to_monitor = "/home/Documents..."
+
+# Define the email address to notify if ransomware is detected
+notification_email = "user@example.com"
+
+# Define the maximum file size to check (in bytes)
+max_file_size = 100000000
+
+# Define the notification message to send if ransomware is detected
+notification_message = f"Ransomware detected in {path_to_monitor}"
+
+# Define the AI-driven honeypot-enabled active defense mechanism
+class RansomwareDetector(pyinotify.ProcessEvent):
+    def __init__(self):
+        # Initialize the Isolation Forest algorithm with a contamination rate of 0.1 and 1000 trees
+        self.iforest = IsolationForest(contamination=0.1, n_estimators=1000)
+        self.file_features = []
+
+    def process_IN_CREATE(self, event):
+        if os.path.isfile(event.pathname):
+            if os.path.getsize(event.pathname) <= max_file_size:
+                # Extract features from the file and add it to the file features array
+                features = self.extract_features(event.pathname)
+                self.file_features.append(features)
+
+                # Train the Isolation Forest algorithm with the updated file features array
+                self.iforest.fit(self.file_features)
+
+                # Check if the file is a ransomware based on its score from the Isolation Forest algorithm
+                score = self.iforest.score_samples([features])[0]
+                if score < -0.5:
+                    self.send_notification_email(notification_message)
+
+    def process_IN_MODIFY(self, event):
+        if os.path.isfile(event.pathname):
+            if os.path.getsize(event.pathname) <= max_file_size:
+                # Extract features from the file and update it in the file features array
+                features = self.extract_features(event.pathname)
+                for i, file_features in enumerate(self.file_features):
+                    if file_features[0] == features[0]:
+                        self.file_features[i] = features
+
+                # Train the Isolation Forest algorithm with the updated file features array
+                self.iforest.fit(self.file_features)
+
+                # Check if the file is a ransomware based on its score from the Isolation Forest algorithm
+                score = self.iforest.score_samples([features])[0]
+                if score < -0.5:
+                    self.send_notification_email(notification_message)
+
+    def extract_features(self, file_path):
+        # Calculate the SHA256 hash of the file
+        sha256_hash = hashlib.sha256()
+        with open(file_path, "rb") as f:
+            while True:
+                data = f.read(65536)
+                if not data:
+                    break
+                sha256_hash.update(data)
+        file_hash = sha256_hash.digest()
+
+        # Calculate the file size
+        file_size = os.path.getsize(file_path)
+
+        # Calculate the entropy of the file
+        with open(file_path, "rb") as f:
+            data = f.read()
+            file_entropy = self.calculate_entropy(data)
+
+        # Combine the features into a single array
+        features = np.array([file_hash, file_size, file_entropy])
+
+        return features
+
+    def calculate_entropy(self, data):
+        # Calculate the probability distribution of the data
+        prob = [float(data.count(c)) / len(data) for c in dict.fromkeys(list(data))]
+
+        # Calculate the entropy of the data
+        entropy = - sum([p * np.log2(p) for p in prob])
+
+    return entropy
+
+def send_notification_email(self, message):
+    # Implement notification code here
+    pass
+
+def main():
+# Initialize the pyinotify watcher and event handler
+wm = pyinotify.WatchManager()
+handler = RansomwareDetector()
+# Add the path to monitor and set the event mask
+wm.add_watch(path_to_monitor, pyinotify.IN_CREATE | pyinotify.IN_MODIFY)
+
+# Initialize the notifier and start the event loop
+notifier = pyinotify.Notifier(wm, handler)
+notifier.loop()
+
+if name == 'main':
+main()

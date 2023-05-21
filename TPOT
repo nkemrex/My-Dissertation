@@ -1,0 +1,99 @@
+{
+    "name": "MyTpot",
+    "id": "/subscriptions/97aa03da-ddec-4d29-9fa1-8287676437f5/resourceGroups/HoneyPot/providers/Microsoft.Compute/virtualMachines/MyTpot",
+    "type": "Microsoft.Compute/virtualMachines",
+    "location": "japaneast",
+    "properties": {
+        "vmId": "596dd6de-4f67-46f3-9097-4d9eeec0d8b0",
+        "hardwareProfile": {
+            "vmSize": "Standard_D4s_v3"
+        },
+        "storageProfile": {
+            "imageReference": {
+                "publisher": "debian",
+                "offer": "debian-11",
+                "sku": "11-gen2",
+                "version": "latest",
+                "exactVersion": "0.20230124.1270"
+            },
+            "osDisk": {
+                "osType": "Linux",
+                "name": "MyTpot_OsDisk_1_e0fefce5803e45b388dcd582e4b1bf90",
+                "createOption": "FromImage",
+                "caching": "ReadWrite",
+                "managedDisk": {
+                    "storageAccountType": "Premium_LRS",
+                    "id": "/subscriptions/97aa03da-ddec-4d29-9fa1-8287676437f5/resourceGroups/HoneyPot/providers/Microsoft.Compute/disks/MyTpot_OsDisk_1_e0fefce5803e45b388dcd582e4b1bf90"
+                },
+                "deleteOption": "Delete",
+                "diskSizeGB": 30
+            },
+            "dataDisks": [
+                {
+                    "lun": 1,
+                    "name": "MyTpot_DataDisk_1",
+                    "createOption": "Attach",
+                    "caching": "ReadOnly",
+                    "writeAcceleratorEnabled": false,
+                    "managedDisk": {
+                        "storageAccountType": "Premium_LRS",
+                        "id": "/subscriptions/97aa03da-ddec-4d29-9fa1-8287676437f5/resourceGroups/HoneyPot/providers/Microsoft.Compute/disks/MyTpot_DataDisk_1"
+                    },
+                    "deleteOption": "Detach",
+                    "diskSizeGB": 128,
+                    "toBeDetached": false
+                }
+            ]
+        },
+        "osProfile": {
+            "computerName": "MyTpot",
+            "adminUsername": "Mwenyewe",
+            "linuxConfiguration": {
+                "disablePasswordAuthentication": false,
+                "provisionVMAgent": true,
+                "patchSettings": {
+                    "patchMode": "ImageDefault",
+                    "assessmentMode": "ImageDefault"
+                }
+            },
+            "secrets": [],
+            "allowExtensionOperations": true,
+            "requireGuestProvisionSignal": true
+        },
+        "networkProfile": {
+            "networkInterfaces": [
+                {
+                    "id": "/subscriptions/97aa03da-ddec-4d29-9fa1-8287676437f5/resourceGroups/HoneyPot/providers/Microsoft.Network/networkInterfaces/mytpot439_z1",
+                    "properties": {
+                        "deleteOption": "Detach"
+                    }
+                }
+            ]
+        },
+        "diagnosticsProfile": {
+            "bootDiagnostics": {
+                "enabled": true
+            }
+        },
+        "provisioningState": "Succeeded"
+    },
+    "zones": [
+        "1"
+    ],
+    "resources": [
+        {
+            "name": "enablevmaccess",
+            "id": "/subscriptions/97aa03da-ddec-4d29-9fa1-8287676437f5/resourceGroups/HoneyPot/providers/Microsoft.Compute/virtualMachines/MyTpot/extensions/enablevmaccess",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "location": "japaneast",
+            "properties": {
+                "autoUpgradeMinorVersion": true,
+                "provisioningState": "Succeeded",
+                "publisher": "Microsoft.OSTCExtensions",
+                "type": "VMAccessForLinux",
+                "typeHandlerVersion": "1.4",
+                "settings": {}
+            }
+        }
+    ]
+}
