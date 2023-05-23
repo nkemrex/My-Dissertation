@@ -2,7 +2,6 @@ import os
 import hashlib
 import pyinotify
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import IsolationForest
 import smtplib
 
@@ -24,47 +23,40 @@ class RansomwareDetector(pyinotify.ProcessEvent):
     def __init__(self):
         # Initialize the Isolation Forest algorithm with a contamination rate of 0.1 and 1000 trees
         self.iforest = IsolationForest(contamination=0.1, n_estimators=1000)
-        self.file_features = None
-        self.scaler = MinMaxScaler()
+        self.file_features = []
 
     def process_IN_CREATE(self, event):
         if os.path.isfile(event.pathname):
             if os.path.getsize(event.pathname) <= max_file_size:
-                # Extract features from the file and add them to the file features array
+                # Extract features from the file and add them to the file features list
                 features = self.extract_features(event.pathname)
-                if self.file_features is None:
-                    self.file_features = np.array([features])
-                else:
-                    self.file_features = np.vstack([self.file_features, features])
+                self.file_features.append(features)
 
-                # Train the Isolation Forest algorithm with the updated file features array
+                # Train the Isolation Forest algorithm with the updated file features
                 self.iforest.fit(self.file_features)
 
                 # Check if the file is ransomware based on its score from the Isolation Forest algorithm
-                score = self.iforest.score_samples(self.scaler.transform([features]))[0]
+                score = self.iforest.score_samples([features])[0]
                 if score < -0.5:
                     self.send_notification_email(notification_message)
 
     def process_IN_MODIFY(self, event):
         if os.path.isfile(event.pathname):
             if os.path.getsize(event.pathname) <= max_file_size:
-                # Extract features from the file and update them in the file features array
+                # Extract features from the file and update them in the file features list
                 features = self.extract_features(event.pathname)
-                if self.file_features is None:
-                    self.file_features = np.array([features])
+                file_hashes = [f[0] for f in self.file_features]
+                if features[0] in file_hashes:
+                    idx = file_hashes.index(features[0])
+                    self.file_features[idx] = features
                 else:
-                    file_hashes = self.file_features[:, 0]
-                    idx = np.where(file_hashes == features[0])[0]
-                    if len(idx) > 0:
-                        self.file_features[idx] = features
-                    else:
-                        self.file_features = np.vstack([self.file_features, features])
+                    self.file_features.append(features)
 
-                # Train the Isolation Forest algorithm with the updated file features array
+                # Train the Isolation Forest algorithm with the updated file features
                 self.iforest.fit(self.file_features)
 
                 # Check if the file is ransomware based on its score from the Isolation Forest algorithm
-                score = self.iforest.score_samples(self.scaler.transform([features]))[0]
+                score = self.iforest.score_samples([features])[0]
                 if score < -0.5:
                     self.send_notification_email(notification_message)
 
@@ -79,24 +71,10 @@ class RansomwareDetector(pyinotify.ProcessEvent):
         # Calculate the file size
         file_size = os.path.getsize(file_path)
 
-        # Calculate the entropy of the file
-        with open(file_path, "rb") as f:
-            data = f.read()
-            file_entropy = self.calculate_entropy(data)
-
         # Combine the features into a single array
-        features = np.array([file_hash, file_size, file_entropy])
+        features = [file_hash, file_size]
 
         return features
-
-    def calculate_entropy(self, data):
-        # Calculate the probability distribution of the data
-        prob = [float(data.count(c)) / len(data) for c in dict.fromkeys(list(data))]
-
-        # Calculate the entropy of the data
-        entropy = -sum([p * np.log2(p) for p in prob])
-
-        return entropy
 
     def send_notification_email(self, message):
         # Email configuration
