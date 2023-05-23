@@ -2,6 +2,7 @@ import os
 import hashlib
 import pyinotify
 import numpy as np
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import IsolationForest
 import smtplib
 
@@ -24,6 +25,7 @@ class RansomwareDetector(pyinotify.ProcessEvent):
         # Initialize the Isolation Forest algorithm with a contamination rate of 0.1 and 1000 trees
         self.iforest = IsolationForest(contamination=0.1, n_estimators=1000)
         self.file_features = None
+        self.scaler = MinMaxScaler()
 
     def process_IN_CREATE(self, event):
         if os.path.isfile(event.pathname):
@@ -39,7 +41,7 @@ class RansomwareDetector(pyinotify.ProcessEvent):
                 self.iforest.fit(self.file_features)
 
                 # Check if the file is ransomware based on its score from the Isolation Forest algorithm
-                score = self.iforest.score_samples([features])[0]
+                score = self.iforest.score_samples(self.scaler.transform([features]))[0]
                 if score < -0.5:
                     self.send_notification_email(notification_message)
 
@@ -62,20 +64,17 @@ class RansomwareDetector(pyinotify.ProcessEvent):
                 self.iforest.fit(self.file_features)
 
                 # Check if the file is ransomware based on its score from the Isolation Forest algorithm
-                score = self.iforest.score_samples([features])[0]
+                score = self.iforest.score_samples(self.scaler.transform([features]))[0]
                 if score < -0.5:
                     self.send_notification_email(notification_message)
 
     def extract_features(self, file_path):
         # Calculate the SHA256 hash of the file
-        sha256_hash = hashlib.sha256()
+        file_hash = hashlib.sha256()
         with open(file_path, "rb") as f:
-            while True:
-                data = f.read(65536)
-                if not data:
-                    break
-                sha256_hash.update(data)
-        file_hash = int.from_bytes(sha256_hash.digest(), byteorder='big')  # Convert byte hash to numeric representation
+            for chunk in iter(lambda: f.read(4096), b""):
+                file_hash.update(chunk)
+        file_hash = int(file_hash.hexdigest(), 16)
 
         # Calculate the file size
         file_size = os.path.getsize(file_path)
