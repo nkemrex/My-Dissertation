@@ -18,7 +18,7 @@ max_file_size = 100000000
 notification_message = f"Ransomware detected in {path_to_monitor}"
 
 
-# Define the AI-driven honeypot-enabled active defence mechanism
+# Define the AI-driven honeypot-enabled active defense mechanism
 class RansomwareDetector(pyinotify.ProcessEvent):
     def __init__(self):
         # Initialize the Isolation Forest algorithm with a contamination rate of 0.1 and 1000 trees
@@ -28,7 +28,7 @@ class RansomwareDetector(pyinotify.ProcessEvent):
     def process_IN_CREATE(self, event):
         if os.path.isfile(event.pathname):
             if os.path.getsize(event.pathname) <= max_file_size:
-                # Extract features from the file and add it to the file features array
+                # Extract features from the file and add them to the file features array
                 features = self.extract_features(event.pathname)
                 if self.file_features is None:
                     self.file_features = np.array([features])
@@ -46,7 +46,7 @@ class RansomwareDetector(pyinotify.ProcessEvent):
     def process_IN_MODIFY(self, event):
         if os.path.isfile(event.pathname):
             if os.path.getsize(event.pathname) <= max_file_size:
-                # Extract features from the file and update it in the file features array
+                # Extract features from the file and update them in the file features array
                 features = self.extract_features(event.pathname)
                 if self.file_features is None:
                     self.file_features = np.array([features])
@@ -75,7 +75,7 @@ class RansomwareDetector(pyinotify.ProcessEvent):
                 if not data:
                     break
                 sha256_hash.update(data)
-        file_hash = sha256_hash.digest()
+        file_hash = int.from_bytes(sha256_hash.digest(), byteorder='big')  # Convert byte hash to numeric representation
 
         # Calculate the file size
         file_size = os.path.getsize(file_path)
@@ -132,12 +132,4 @@ def main():
     handler = RansomwareDetector()
 
     # Add the path to monitor and set the event mask
-    wm.add_watch(path_to_monitor, pyinotify.IN_CREATE | pyinotify.IN_MODIFY)
-
-    # Initialize the notifier and start the event loop
-    notifier = pyinotify.Notifier(wm, handler)
-    notifier.loop()
-
-
-if __name__ == '__main__':
-    main()
+    wm.add_watch(path_to_monitor, pyinotify.IN
