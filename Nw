@@ -1,0 +1,25 @@
+python3 ransomware_detection.py
+Traceback (most recent call last):
+  File "/home/rex/ransomware_simulation/ransomware_detection.py", line 134, in <module>
+    main()
+  File "/home/rex/ransomware_simulation/ransomware_detection.py", line 130, in main
+    notifier.loop()
+  File "/home/rex/.local/lib/python3.10/site-packages/pyinotify.py", line 1376, in loop
+    self.process_events()
+  File "/home/rex/.local/lib/python3.10/site-packages/pyinotify.py", line 1275, in process_events
+    self._default_proc_fun(revent)
+  File "/home/rex/.local/lib/python3.10/site-packages/pyinotify.py", line 910, in __call__
+    return _ProcessEvent.__call__(self, event)
+  File "/home/rex/.local/lib/python3.10/site-packages/pyinotify.py", line 630, in __call__
+    return meth(event)
+  File "/home/rex/ransomware_simulation/ransomware_detection.py", line 53, in process_IN_MODIFY
+    self.iforest.fit(self.file_features)
+  File "/home/rex/.local/lib/python3.10/site-packages/sklearn/ensemble/_iforest.py", line 290, in fit
+    X = self._validate_data(X, accept_sparse=["csc"], dtype=tree_dtype)
+  File "/home/rex/.local/lib/python3.10/site-packages/sklearn/base.py", line 565, in _validate_data
+    X = check_array(X, input_name="X", **check_params)
+  File "/home/rex/.local/lib/python3.10/site-packages/sklearn/utils/validation.py", line 902, in check_array
+    raise ValueError(
+ValueError: Expected 2D array, got 1D array instead:
+array=[].
+Reshape your data either using array.reshape(-1, 1) if your data has a single feature or array.reshape(1, -1) if it contains a single sample.
