@@ -3,12 +3,13 @@ import hashlib
 import pyinotify
 import numpy as np
 from sklearn.ensemble import IsolationForest
+import smtplib
 
 # Define the path to monitor
-path_to_monitor = "/home/Documents..."
+path_to_monitor = "/home/rex/ransomware_simulation"
 
 # Define the E-Mail address to notify if ransomware is detected
-notification_email = "user@example.com"
+notification_email = "Nkemjikakelechig@gmail.com"
 
 # Define the maximum file size to check (in bytes)
 max_file_size = 100000000
@@ -90,8 +91,30 @@ class RansomwareDetector(pyinotify.ProcessEvent):
         return entropy
 
     def send_notification_email(self, message):
-        # Implement notification code here
-        pass
+        # Email configuration
+        smtp_server = "smtp.gmail.com"
+        smtp_port = 587
+        sender_email = "Rexynkem@yandex.ru"  
+        sender_password = "lordrex1$"  
+
+        # Recipient email address
+        recipient_email = notification_email
+
+        # Create the email message
+        subject = "Ransomware Detected"
+        body = message
+        email_message = f"Subject: {subject}\n\n{body}"
+
+        # Send the email
+        try:
+            server = smtplib.SMTP(smtp_server, smtp_port)
+            server.starttls()
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, recipient_email, email_message)
+            server.quit()
+            print("Notification email sent successfully!")
+        except Exception as e:
+            print(f"Failed to send notification email: {str(e)}")
 
 
 def main():
