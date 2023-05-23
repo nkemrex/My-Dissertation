@@ -132,4 +132,12 @@ def main():
     handler = RansomwareDetector()
 
     # Add the path to monitor and set the event mask
-    wm.add_watch(path_to_monitor, pyinotify.IN
+    wm.add_watch(path_to_monitor, pyinotify.IN_CREATE | pyinotify.IN_MODIFY)
+
+    # Initialize the notifier and start the event loop
+    notifier = pyinotify.Notifier(wm, handler)
+    notifier.loop()
+
+
+if __name__ == '__main__':
+    main()
