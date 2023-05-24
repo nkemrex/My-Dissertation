@@ -84,8 +84,8 @@ class RansomwareDetector(pyinotify.ProcessEvent):
         return features
 
     def send_notification_email(self, message):
-        sender_email = "nkimrex55@gmail.com"
-        sender_password = "lordrex1$"
+        sender_email = "your_email@gmail.com"
+        sender_password = "your_password"
         recipient_email = notification_email
         smtp_server = "smtp.gmail.com"
         smtp_port = 587
