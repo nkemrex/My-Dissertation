@@ -2,7 +2,7 @@ import os
 import hashlib
 import pyinotify
 import numpy as np
-from sklearn.ensemble import IsolationForest
+from sklearn.svm import OneClassSVM
 from sklearn.preprocessing import MinMaxScaler
 import smtplib
 
@@ -22,8 +22,8 @@ notification_message = f"Ransomware detected in {path_to_monitor}"
 # Define the AI-driven honeypot-enabled active defense mechanism
 class RansomwareDetector(pyinotify.ProcessEvent):
     def __init__(self):
-        # Initialize the Isolation Forest algorithm with a contamination rate of 0.1 and 1000 trees
-        self.iforest = IsolationForest(contamination=0.1, n_estimators=1000)
+        # Initialize the One-Class SVM algorithm with a contamination rate of 0.1 and the 'rbf' kernel
+        self.ocsvm = OneClassSVM(nu=0.1, kernel='rbf')
         self.file_features = []
         self.scaler = MinMaxScaler()
 
@@ -37,11 +37,11 @@ class RansomwareDetector(pyinotify.ProcessEvent):
                 # Normalize the file features
                 self.file_features = self.scaler.fit_transform(self.file_features)
 
-                # Train the Isolation Forest algorithm with the normalized file features
-                self.iforest.fit(self.file_features)
+                # Train the One-Class SVM algorithm with the normalized file features
+                self.ocsvm.fit(self.file_features)
 
-                # Check if the file is ransomware based on its score from the Isolation Forest algorithm
-                score = self.iforest.score_samples([features])[0]
+                # Check if the file is ransomware based on its score from the One-Class SVM algorithm
+                score = self.ocsvm.decision_function([features])[0]
                 if score < -0.5:
                     self.send_notification_email(notification_message)
 
@@ -60,11 +60,11 @@ class RansomwareDetector(pyinotify.ProcessEvent):
                 # Normalize the file features
                 self.file_features = self.scaler.fit_transform(self.file_features)
 
-                # Train the Isolation Forest algorithm with the normalized file features
-                self.iforest.fit(self.file_features)
+                # Train the One-Class SVM algorithm with the normalized file features
+                self.ocsvm.fit(self.file_features)
 
-                # Check if the file is ransomware based on its score from the Isolation Forest algorithm
-                score = self.iforest.score_samples([features])[0]
+                # Check if the file is ransomware based on its score from the One-Class SVM algorithm
+                score = self.ocsvm.decision_function([features])[0]
                 if score < -0.5:
                     self.send_notification_email(notification_message)
 
@@ -79,7 +79,7 @@ class RansomwareDetector(pyinotify.ProcessEvent):
         # Calculate the file size
         file_size = os.path.getsize(file_path)
 
-        # Combine the features into a single array
+        # Combine the features into a feature vector
         features = [file_hash, file_size]
         return features
 
