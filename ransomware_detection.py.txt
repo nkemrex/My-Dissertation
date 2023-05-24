@@ -3,6 +3,7 @@ import hashlib
 import pyinotify
 import numpy as np
 from sklearn.ensemble import IsolationForest
+from sklearn.preprocessing import MinMaxScaler
 import smtplib
 
 # Define the path to monitor
@@ -24,6 +25,7 @@ class RansomwareDetector(pyinotify.ProcessEvent):
         # Initialize the Isolation Forest algorithm with a contamination rate of 0.1 and 1000 trees
         self.iforest = IsolationForest(contamination=0.1, n_estimators=1000)
         self.file_features = []
+        self.scaler = MinMaxScaler()
 
     def process_IN_CREATE(self, event):
         if os.path.isfile(event.pathname):
@@ -32,7 +34,10 @@ class RansomwareDetector(pyinotify.ProcessEvent):
                 features = self.extract_features(event.pathname)
                 self.file_features.append(features)
 
-                # Train the Isolation Forest algorithm with the updated file features
+                # Normalize the file features
+                self.file_features = self.scaler.fit_transform(self.file_features)
+
+                # Train the Isolation Forest algorithm with the normalized file features
                 self.iforest.fit(self.file_features)
 
                 # Check if the file is ransomware based on its score from the Isolation Forest algorithm
@@ -52,7 +57,10 @@ class RansomwareDetector(pyinotify.ProcessEvent):
                 else:
                     self.file_features.append(features)
 
-                # Train the Isolation Forest algorithm with the updated file features
+                # Normalize the file features
+                self.file_features = self.scaler.fit_transform(self.file_features)
+
+                # Train the Isolation Forest algorithm with the normalized file features
                 self.iforest.fit(self.file_features)
 
                 # Check if the file is ransomware based on its score from the Isolation Forest algorithm
@@ -73,25 +81,17 @@ class RansomwareDetector(pyinotify.ProcessEvent):
 
         # Combine the features into a single array
         features = [file_hash, file_size]
-
         return features
 
     def send_notification_email(self, message):
-        # Email configuration
+        sender_email = "nkimrex55@gmail.com"
+        sender_password = "lordrex1$"
+        recipient_email = notification_email
         smtp_server = "smtp.gmail.com"
         smtp_port = 587
-        sender_email = "Rexynkem@yandex.ru"
-        sender_password = "lordrex1$"
 
-        # Recipient email address
-        recipient_email = notification_email
+        email_message = f"Subject: Ransomware Detected\n\n{message}"
 
-        # Create the email message
-        subject = "Ransomware Detected"
-        body = message
-        email_message = f"Subject: {subject}\n\n{body}"
-
-        # Send the email
         try:
             server = smtplib.SMTP(smtp_server, smtp_port)
             server.starttls()
@@ -104,14 +104,9 @@ class RansomwareDetector(pyinotify.ProcessEvent):
 
 
 def main():
-    # Initialize the pyinotify watcher and event handler
     wm = pyinotify.WatchManager()
     handler = RansomwareDetector()
-
-    # Add the path to monitor and set the event mask
     wm.add_watch(path_to_monitor, pyinotify.IN_CREATE | pyinotify.IN_MODIFY)
-
-    # Initialize the notifier and start the event loop
     notifier = pyinotify.Notifier(wm, handler)
     notifier.loop()
 
